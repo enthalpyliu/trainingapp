@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#183b36">
+<meta name="description" content="A simple 12-week strength training and back-symptom tracker.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Strength Log</title>
+<style>
+:root{--ink:#172b28;--muted:#64736f;--bg:#f3f6f4;--card:#fff;--line:#dce5e0;--green:#1f6658;--pale:#e7f1ed;--amber:#8a5b12;--red:#a33d36}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#183b36;color:#fff;padding:18px 16px 14px;position:sticky;top:0;z-index:5}
+header .top{max-width:900px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-size:21px;margin:0;font-weight:750;letter-spacing:.2px}.sub{color:#d0e1db;font-size:12px;margin-top:3px}
+main{max-width:900px;margin:0 auto;padding:14px 14px 90px}
+nav{display:flex;gap:6px;max-width:900px;margin:12px auto 0;padding:0 14px}
+nav button{flex:1;border:0;background:#31544e;color:#dce9e4;border-radius:10px;padding:10px 5px;font-weight:650}
+nav button.active{background:#fff;color:#183b36}
+button,.btn{cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit;font-weight:650}
+button.primary{background:var(--green);border-color:var(--green);color:#fff}
+button.small{padding:7px 9px;font-size:13px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px;margin:0 0 12px;box-shadow:0 2px 8px #173b3610}
+h2{font-size:18px;margin:0 0 10px}h3{font-size:15px;margin:0 0 6px}
+.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.between{justify-content:space-between}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.stat{background:var(--pale);border-radius:11px;padding:10px}.stat strong{display:block;font-size:21px}
+.pill{display:inline-block;background:var(--pale);color:var(--green);border-radius:20px;padding:4px 9px;font-size:12px;font-weight:750}
+.exercise{border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0}
+.exercise.done{border-color:#8bb7a8;background:#f6fbf8}
+.exercise-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.setrow{display:grid;grid-template-columns:35px 1fr 1fr 34px;gap:6px;align-items:center;margin-top:7px}
+input,select,textarea{width:100%;padding:9px;border:1px solid #cbd8d1;border-radius:8px;background:white;color:var(--ink);font:inherit;min-width:0}
+input[type=checkbox]{width:19px;height:19px;accent-color:var(--green)}
+label{font-size:12px;color:var(--muted);display:block;margin:8px 0 4px}
+textarea{min-height:68px;resize:vertical}
+.notice{padding:10px 12px;border-radius:10px;background:#fff6e6;color:#674710;font-size:13px;margin:10px 0}
+.good{background:#eaf5ef;color:#205b45}.danger{background:#fff0ee;color:#8b2e28}
+.hidden{display:none!important}.tabs{display:flex;gap:7px;margin-bottom:12px}.tabs button{flex:1}
+.progress{height:9px;background:#e5ece8;border-radius:20px;overflow:hidden}.progress span{display:block;height:100%;background:var(--green)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:8px 5px;border-bottom:1px solid var(--line)}
+footer{font-size:12px;color:var(--muted);text-align:center;padding:15px}
+@media(min-width:650px){main{padding-top:20px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top"><div><h1>Strength Log</h1><div class="sub">12-week strength plan · simple, steady progress</div></div><span class="pill" style="background:#d9eee5">Offline-ready</span></div>
+ <nav>
+  <button class="active" data-tab="today">Today</button><button data-tab="plan">Plan</button><button data-tab="progress">Progress</button><button data-tab="data">Data</button>
+ </nav>
+</header>
+<main>
+<section id="today">
+ <div class="card">
+  <div class="row between"><div><div class="tiny">YOUR NEXT SESSION</div><h2 id="todayTitle">Workout A</h2></div><span class="pill" id="weekBadge">Week 1</span></div>
+  <p class="muted" id="todayIntro">Full-body session · about 25 minutes</p>
+  <div class="grid">
+   <div class="stat"><span class="tiny">Sessions completed</span><strong id="doneCount">0</strong></div>
+   <div class="stat"><span class="tiny">This week's target</span><strong id="weekCount">0 / 3</strong></div>
+  </div>
+  <div style="margin-top:12px" class="progress"><span id="weekBar" style="width:0%"></span></div>
+  <div class="row" style="margin-top:13px"><button class="primary" id="startBtn">Start / continue workout</button><button id="skipBtn" class="small">Mark day skipped</button></div>
+ </div>
+ <div class="card"><h2>Training guidance</h2>
+  <div class="notice">Back-first rule: stop or modify any movement that increases back pain. Record symptoms honestly. Do not increase weight just to hit a target.</div>
+  <p class="tiny">Use a load that leaves about 3–4 good repetitions in reserve. Move smoothly, breathe normally, and keep the range comfortable. Progress only when technique and next-day response are good.</p>
+ </div>
+ <div class="card"><h2>Recent activity</h2><div id="recent" class="muted">No workouts logged yet.</div></div>
+</section>
+
+<section id="plan" class="hidden">
+ <div class="card"><h2>12-week schedule</h2>
+  <p class="muted">Three sessions per week, alternating A and B. Suggested days: Monday, Wednesday and Friday. If you miss a day, continue with the next planned session; do not double up.</p>
+  <div id="weekPlan"></div>
+ </div>
+ <div class="card"><h2>Exercise reference</h2><div id="exerciseReference"></div></div>
+</section>
+
+<section id="progress" class="hidden">
+ <div class="card"><h2>Progress overview</h2><div class="grid">
+  <div class="stat"><span class="tiny">Workouts</span><strong id="pWorkouts">0</strong></div>
+  <div class="stat"><span class="tiny">Full training weeks</span><strong id="pWeeks">0</strong></div>
+  <div class="stat"><span class="tiny">Latest weight</span><strong id="pWeight">—</strong></div>
+  <div class="stat"><span class="tiny">Latest waist</span><strong id="pWaist">—</strong></div>
+ </div></div>
+ <div class="card"><h2>Body measurements</h2>
+  <p class="tiny">Measure under similar conditions. Waist: relaxed, after normal exhalation, at the same landmark each time.</p>
+  <div class="grid"><div><label>Date</label><input type="date" id="measureDate"></div><div><label>Weight (lb)</label><input type="number" step=".1" id="measureWeight" placeholder="e.g. 158.2"></div><div><label>Waist (cm)</label><input type="number" step=".1" id="measureWaist" placeholder="e.g. 89"></div><div><label>Body fat % (optional)</label><input type="number" step=".1" id="measureFat" placeholder="scale estimate"></div></div>
+  <button class="primary" id="saveMeasure" style="margin-top:10px">Save measurement</button>
+  <div id="measureHistory" style="margin-top:12px"></div>
+ </div>
+ <div class="card"><h2>Strength history</h2><div id="strengthHistory" class="muted">Log workouts to see your history.</div></div>
+</section>
+
+<section id="data" class="hidden">
+ <div class="card"><h2>Backup and restore</h2>
+  <p class="muted">Your data stays in this browser on this device. Export a backup regularly, especially before clearing browser data or changing phones.</p>
+  <div class="row"><button class="primary" id="exportBtn">Export backup (.json)</button><label class="btn" style="margin:0">Import backup<input id="importFile" type="file" accept="application/json,.json" hidden></label></div>
+  <p class="tiny" id="backupStatus">No cloud account or synchronization is used.</p>
+ </div>
+ <div class="card"><h2>Plan settings</h2>
+  <label>Plan start date</label><input type="date" id="startDate">
+  <button id="saveStart" style="margin-top:9px">Save start date</button>
+  <p class="tiny">The plan uses elapsed weeks from this date. Changing the start date does not delete workout history.</p>
+ </div>
+ <div class="card"><h2>Safety notes</h2>
+  <ul class="tiny">
+   <li>This tracker is not a diagnostic tool or substitute for an individualized assessment.</li>
+   <li>Because you have had recurrent episodes of significant low-back pain, arrange a non-urgent assessment with a physical therapist or clinician before progressing to heavy lifting.</li>
+   <li>Seek urgent medical care for new bladder/bowel dysfunction, saddle numbness, or progressive leg weakness.</li>
+   <li>Do not train through sharp, increasing, radiating, or neurologic symptoms.</li>
+  </ul>
+ </div>
+</section>
+</main>
+<footer>Strength Log · Data is stored locally on this device</footer>
+
+<div id="workoutModal" class="hidden" style="position:fixed;inset:0;background:#10221fcc;z-index:10;overflow:auto;padding:12px">
+ <div style="max-width:720px;margin:20px auto;background:var(--bg);border-radius:16px;padding:14px">
+  <div class="row between"><div><div class="tiny">WORKOUT LOGGER</div><h2 id="modalTitle">Workout A</h2></div><button id="closeModal">Close</button></div>
+  <p class="tiny">Enter the weight used for each dumbbell (per hand where applicable) and completed reps. Bodyweight exercises can leave weight blank.</p>
+  <div id="exerciseLog"></div>
+  <div class="card"><h3>Back and session check-in</h3>
+   <label>Back discomfort during this session</label><select id="painDuring"><option value="0">0 — none</option><option value="1">1 — mild / noticeable</option><option value="2">2 — moderate / changed movement</option><option value="3">3 — strong / stopped an exercise</option><option value="4">4 — severe</option></select>
+   <label>Back response the following morning (update later if needed)</label><select id="painNext"><option value="">Not recorded yet</option><option value="0">0 — normal / none</option><option value="1">1 — mild</option><option value="2">2 — moderate</option><option value="3">3 — strong</option><option value="4">4 — severe</option></select>
+   <label>Session notes / any exercise that felt uncomfortable</label><textarea id="sessionNotes" placeholder="Optional"></textarea>
+  </div>
+  <div class="row between"><span class="tiny" id="logProgress">0 exercises completed</span><button class="primary" id="finishWorkout">Save workout</button></div>
+ </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const todayISO=()=>{let d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const plan={
+ A:[
+  {id:"floor_press",name:"Dumbbell floor press",sets:2,reps:"10–12",start:"5–8 lb each",weight:6,unit:"lb",how:"Lie on the floor with knees bent. Press dumbbells vertically; upper arms gently touch the floor. Keep ribs relaxed; do not arch."},
+  {id:"sit_stand",name:"Chair sit-to-stand",sets:2,reps:"10–12",start:"Bodyweight",weight:"",unit:"lb",how:"Use a stable chair. Stand up and sit down with control; use hands for assistance if needed."},
+  {id:"lateral_raise",name:"Seated lateral raise",sets:2,reps:"10–12",start:"2–3 lb each",weight:2,unit:"lb",how:"Sit upright with back supported if possible. Raise arms only to a comfortable height; avoid shrugging."},
+  {id:"bridge",name:"Glute bridge (only if comfortable)",sets:2,reps:"8–10",start:"Bodyweight",weight:"",unit:"lb",how:"Lie on back, knees bent. Gently lift hips without forcing the lower back into an arch. Skip if uncomfortable."},
+  {id:"bracing",name:"Supine abdominal brace",sets:2,reps:"5–8 holds",start:"Bodyweight",weight:"",unit:"lb",how:"On your back with knees bent, gently tighten abdominal wall while breathing normally. Hold 5–8 seconds."}
+ ],
+ B:[
+  {id:"row",name:"Chest-supported dumbbell row",sets:2,reps:"10–12",start:"5–8 lb each",weight:6,unit:"lb",how:"Use an incline bench with chest supported. If you do not have a suitable bench, skip this for now rather than substituting an unsupported bent-over row."},
+  {id:"split_squat",name:"Supported split squat",sets:2,reps:"8 each leg",start:"Bodyweight",weight:"",unit:"lb",how:"Hold a stable support. Use a shallow, comfortable range and keep torso controlled."},
+  {id:"curl",name:"Seated dumbbell curl",sets:2,reps:"10–12",start:"Light, controlled",weight:5,unit:"lb",how:"Sit tall, elbows near sides. Avoid swinging or leaning backward."},
+  {id:"calf_raise",name:"Supported calf raise",sets:2,reps:"12–15",start:"Bodyweight",weight:"",unit:"lb",how:"Hold a stable support, rise and lower slowly."},
+  {id:"side_plank",name:"Modified side plank",sets:2,reps:"10–15 sec/side",start:"Bodyweight",weight:"",unit:"lb",how:"Start from knees, keep body aligned. Stop if it provokes back pain; a PT can modify this."}
+ ]
+};
+let db=load();
+function load(){try{return JSON.parse(localStorage.getItem("strengthLogV1"))||{startDate:todayISO(),sessions:[],measurements:[]}}catch(e){return {startDate:todayISO(),sessions:[],measurements:[]}}}
+function save(){localStorage.setItem("strengthLogV1",JSON.stringify(db));renderAll()}
+function elapsedWeek(){let d=new Date(db.startDate+"T12:00:00"),n=new Date(todayISO()+"T12:00:00");return Math.max(1,Math.min(12,Math.floor((n-d)/604800000)+1))}
+function sessionType(){return db.sessions.filter(s=>s.status==="completed").length%2===0?"A":"B"}
+function weekSessions(){let w=elapsedWeek(),start=new Date(db.startDate+"T12:00:00");start.setDate(start.getDate()+(w-1)*7);let end=new Date(start);end.setDate(end.getDate()+7);return db.sessions.filter(s=>s.status==="completed"&&new Date(s.date+"T12:00:00")>=start&&new Date(s.date+"T12:00:00")<end).length}
+function renderAll(){renderToday();renderPlan();renderProgress();$("startDate").value=db.startDate}
+function renderToday(){let t=sessionType();$("todayTitle").textContent="Workout "+t;$("weekBadge").textContent="Week "+elapsedWeek();$("doneCount").textContent=db.sessions.filter(s=>s.status==="completed").length;$("weekCount").textContent=weekSessions()+" / 3";$("weekBar").style.width=Math.min(100,weekSessions()/3*100)+"%";let r=db.sessions.filter(s=>s.status==="completed").slice(-3).reverse();$("recent").innerHTML=r.length?r.map(s=>`<p><b>${s.date} · Workout ${s.type}</b> <span class="tiny">· back ${s.painDuring}/4</span></p>`).join(""):"No workouts logged yet."}
+function renderPlan(){let out="";for(let w=1;w<=12;w++){let arr=[0,1,2].map((_,i)=>((w-1)*3+i)%2===0?"A":"B");out+=`<div style="padding:9px 0;border-bottom:1px solid var(--line)"><div class="row between"><b>Week ${w}</b><span class="tiny">${w===elapsedWeek()?"Current week":""}</span></div><div class="row" style="margin-top:6px">${arr.map((x,i)=>`<span class="pill">${["Mon","Wed","Fri"][i]} · ${x}</span>`).join("")}</div></div>`} $("weekPlan").innerHTML=out;$("exerciseReference").innerHTML=["A","B"].map(t=>`<h3 style="margin-top:14px">Workout ${t}</h3>`+plan[t].map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${e.name}</b><div class="tiny">${e.sets} sets · ${e.reps} · ${e.how}</div></div>`).join("")).join("")}
+function renderProgress(){let s=db.sessions.filter(x=>x.status==="completed");$("pWorkouts").textContent=s.length;let fullWeeks=new Set(s.filter(x=>x.date).map(x=>{let a=new Date(db.startDate+"T12:00:00"),b=new Date(x.date+"T12:00:00");return Math.floor((b-a)/604800000)}));$("pWeeks").textContent=[...fullWeeks].filter(w=>w>=0&&db.sessions.filter(x=>x.status==="completed"&&Math.floor((new Date(x.date+"T12:00:00")-new Date(db.startDate+"T12:00:00"))/604800000)===w).length>=3).length;let m=db.measurements.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];$("pWeight").textContent=m?.weight?m.weight+" lb":"—";$("pWaist").textContent=m?.waist?m.waist+" cm":"—";$("measureDate").value=todayISO();$("measureHistory").innerHTML=db.measurements.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).map(m=>`<p class="tiny">${m.date} · ${m.weight||"—"} lb · waist ${m.waist||"—"} cm ${m.fat?"· "+m.fat+"% BF":""}</p>`).join("");$("strengthHistory").innerHTML=s.slice().reverse().slice(0,8).map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${x.date} · ${x.type}</b><div class="tiny">Back during: ${x.painDuring}/4 · next morning: ${x.painNext===""?"not recorded":x.painNext+"/4"} ${x.notes?"· "+escapeHTML(x.notes):""}</div></div>`).join("")||"Log workouts to see your history."}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+let active=null;
+function openWorkout(){let type=sessionType();active={id:Date.now(),date:todayISO(),type,exercises:plan[type].map(e=>({...e,setsData:Array.from({length:e.sets},()=>({weight:e.weight,reps:"",done:false}))}))};$("modalTitle").textContent="Workout "+type+" · Week "+elapsedWeek();$("painDuring").value="0";$("painNext").value="";$("sessionNotes").value="";renderLog();$("workoutModal").classList.remove("hidden")}
+function renderLog(){$("exerciseLog").innerHTML=active.exercises.map((e,i)=>`<div class="exercise" id="ex${i}"><div class="exercise-head"><div><b>${e.name}</b><div class="tiny">${e.reps} reps · ${e.how}</div></div><span class="pill">${e.sets} sets</span></div>${e.setsData.map((s,j)=>`<div class="setrow"><b class="tiny">Set ${j+1}</b><div><label>Weight (lb)</label><input type="number" min="0" step=".5" data-e="${i}" data-s="${j}" data-k="weight" value="${s.weight}"></div><div><label>Reps / time</label><input type="text" data-e="${i}" data-s="${j}" data-k="reps" value="${s.reps}" placeholder="${e.reps}"></div><input aria-label="Set completed" type="checkbox" data-e="${i}" data-s="${j}" data-k="done" ${s.done?"checked":""}></div>`).join("")}</div>`).join("");$("exerciseLog").querySelectorAll("input").forEach(el=>el.addEventListener("change",()=>{let s=active.exercises[+el.dataset.e].setsData[+el.dataset.s],k=el.dataset.k;s[k]=k==="done"?el.checked:el.value;updateLogCount()}));updateLogCount()}
+function updateLogCount(){let n=active.exercises.filter(e=>e.setsData.every(s=>s.done)).length;$("logProgress").textContent=n+" / "+active.exercises.length+" exercises fully completed"}
+$("startBtn").onclick=openWorkout;$("closeModal").onclick=()=>$("workoutModal").classList.add("hidden");
+$("finishWorkout").onclick=()=>{if(!active)return;let record={...active,painDuring:+$("painDuring").value,painNext:$("painNext").value===""?"":+$("painNext").value,notes:$("sessionNotes").value,status:"completed"};db.sessions.push(record);active=null;$("workoutModal").classList.add("hidden");save()};
+$("skipBtn").onclick=()=>{if(confirm("Record today as a skipped day? It will not count as a completed workout.")){db.sessions.push({date:todayISO(),type:sessionType(),status:"skipped"});save()}};
+$("saveMeasure").onclick=()=>{let m={date:$("measureDate").value||todayISO(),weight:$("measureWeight").value,waist:$("measureWaist").value,fat:$("measureFat").value};if(!m.weight&&!m.waist&&!m.fat){alert("Enter at least one measurement.");return}db.measurements.push(m);$("measureWeight").value=$("measureWaist").value=$("measureFat").value="";save()};
+$("saveStart").onclick=()=>{if($("startDate").value){db.startDate=$("startDate").value;save();alert("Start date saved.")}};
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("active",x===b));["today","plan","progress","data"].forEach(id=>$(id).classList.toggle("hidden",id!==b.dataset.tab));renderAll()});
+$("exportBtn").onclick=()=>{let blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="strength-log-backup-"+todayISO()+".json";a.click();URL.revokeObjectURL(a.href);$("backupStatus").textContent="Backup exported. Store it somewhere safe."};
+$("importFile").onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let x=JSON.parse(await f.text());if(!Array.isArray(x.sessions)||!Array.isArray(x.measurements)||!x.startDate)throw Error();if(confirm("Import will replace data currently stored in this browser. Continue?")){db=x;save();$("backupStatus").textContent="Backup imported."}}catch(err){alert("This file does not look like a valid Strength Log backup.")}e.target.value=""};
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+renderAll();
+</script>
+</body></html>
